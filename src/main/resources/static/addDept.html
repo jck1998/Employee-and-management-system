@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>add Dept</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css"
+			href="css/style.css" />
+	</head>
+
+	<body>
+		<div id="wrap">
+			<div id="top_content">
+				<div id="header">
+					<div id="rightheader">
+						<p id="cg">
+							2021/03/01 上午12:00:00
+							<br/>
+						</p>
+						<p><a href="javascript:;" @click="exit">安全退出</a></p>
+						<script>
+							setInterval("cg.innerHTML=new Date().toLocaleString()",1000);
+						</script>
+					</div>
+					<div id="topheader">
+						<h1 id="title">
+							<a href="./deptlist.html">部门列表</a>
+						</h1>
+					</div>
+					<div id="navigation">
+					</div>
+				</div>
+				<div id="content">
+					<p id="whereami">
+					</p>
+					<h1>
+						添加部门信息:
+					</h1>
+					<form action="deptlist.html" method="post">
+						<table cellpadding="0" cellspacing="0" border="0"
+							class="form_table">
+							<tr>
+								<td valign="middle" align="right">
+									部门名称:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="dept.name" name="name" />
+								</td>
+							</tr>
+						</table>
+						<p>
+							<input type="button" @click="saveDept" class="button" value="确认" />
+						</p>
+					</form>
+				</div>
+			</div>
+			<div id="footer">
+				<div id="footer_bg">
+					jck@126.com
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script>
+	const app = new Vue({
+		el: "#wrap",
+		data: {
+			user:{//存放用户登录信息
+				username:""
+			},
+			dept:{ }//定义员工信息
+		},
+		methods: {
+			//处理安全退出
+			exit(){
+				localStorage.removeItem("user");
+				location.reload();//刷新页面
+			},
+			//用来上传保存员工信息
+			saveDept(){
+				console.log(this.dept);//获取员工信息
+				var formData = new FormData();
+				formData.append("name",this.dept.name);
+				var _this = this;
+				axios({
+					method: "post",
+					url:"http://localhost:8083/back-end-springboot/dept/save",
+					data:formData,
+					//请求头
+					headers:{
+						'content-type':'multipart/form-data'
+					}
+				}).then(res=>{
+					console.log(res.data);
+					if(res.data.state){
+						if(window.confirm(res.data.message+"确定后跳转列表页面")){
+							location.href="./deptlist.html";
+						}else {
+							_this.dept = {};
+						}
+					}else {
+						alert(res.data.message);
+					}
+				})
+			}
+		},
+		created() {//生命周期函数
+			const userString = localStorage.getItem("user");
+			if (userString){
+				this.user = JSON.parse(userString);
+			}else {
+				alert("没登陆，跳转登陆页面");
+				location.href = "./login.html"
+			}
+		}
+	})
+</script>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.graduationproject.dao.EmpDao">
+
+    <!--<cache type="com.graduationproject.cache.RedisCache">-->
+    <!--</cache>-->
+
+
+<!--  find  -->
+    <select id="find" parameterType="String" resultType="Emp">
+      select id,name,path,salary,age from t_emp
+      where deptId = #{deptId}
+    </select>
+
+<!-- save   -->
+    <insert id="save" parameterType="Emp" useGeneratedKeys="true" keyProperty="id">
+      insert into t_emp value(#{id},#{name},#{path},#{salary},#{age},#{dept.id})
+    </insert>
+
+<!-- delete  -->
+    <delete id="delete" parameterType="String">
+      delete from t_emp where id = #{id}
+    </delete>
+
+<!--  findHead  -->
+    <select id="findHead" parameterType="String" resultType="Emp">
+        select id,name,path,salary,age,deptId from t_emp
+        where id = #{id}
+    </select>
+
+<!--  update  -->
+    <update id="update" parameterType="Emp">
+        update t_emp set
+        name = #{name},
+        path = #{path},
+        salary = #{salary},
+        age = #{age},
+        deptid = #{dept.id}
+        where
+        id = #{id}
+    </update>
+
+
+
+</mapper>

@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>update Emp</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css"
+			href="css/style.css" />
+	</head>
+
+	<body>
+		<div id="wrap">
+			<div id="top_content">
+				<div id="header">
+					<div id="rightheader">
+						<p id="cg">
+							2021/03/01 上午12:00:00
+							<br/>
+						</p>
+						<p><a href="javascript:;" @click="exit">安全退出</a></p>
+						<script>
+							setInterval("cg.innerHTML=new Date().toLocaleString()",1000);
+						</script>
+					</div>
+					<div id="topheader">
+						<h1 id="title">
+							<a href="./emplist.html">企业员工管理系统</a>
+						</h1>
+					</div>
+					<div id="navigation">
+					</div>
+				</div>
+				<div id="content">
+					<p id="whereami">
+					</p>
+					<h1>
+						更新员工信息:
+					</h1>
+					<form action="emplist.html" method="post">
+						<table cellpadding="0" cellspacing="0" border="0"
+							class="form_table">
+							<tr>
+								<td valign="middle" align="right">
+									id:
+								</td>
+								<td valign="middle" align="left">
+									{{emp.id}}
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									头像:
+								</td>
+								<td valign="middle" align="left">
+									<img :src="'/back-end-springboot/'+emp.path" style="height: 50px" alt="">
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									姓名:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.name"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									photo:
+								</td>
+								<td valign="middle" align="left">
+									<input type="file" ref="photo"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									薪资:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.salary"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									年龄:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="emp.age"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									选择部门:
+								</td>
+								<td valign="middle" align="left">
+									<select v-model="deptId" >
+										<option v-for="(dept,index) in depts" :value="dept.id" :key="dept.id">
+											{{dept.name}}
+										</option>
+									</select>
+								</td>
+							</tr>
+						</table>
+						<p>
+							<input type="button" @click="alterEmp" class="button" value="确认" />
+							<a href="javascript:history.go(-1);" style="font-size: 14px;">返回上级</a>
+						</p>
+					</form>
+				</div>
+			</div>
+			<div id="footer">
+				<div id="footer_bg">
+					jck@126.com
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script>
+	const app = new Vue({
+		el: "#wrap",
+		data: {
+			user:{//存放用户登录信息
+				username:""
+			},
+			emp:{},
+			deptId:0,
+			depts:[],
+		},
+		methods: {
+			//处理安全退出
+			exit(){
+				localStorage.removeItem("user");
+				location.reload();//刷新页面
+			},
+			//处理员工信息修改
+			alterEmp(){
+				console.log(this.emp);
+				console.log(this.$refs.photo.files[0]);
+				var formData = new FormData();
+				formData.append("id",this.emp.id);
+				formData.append("name",this.emp.name);
+				formData.append("path",this.emp.path);
+				formData.append("salary",this.emp.salary);
+				formData.append("age",this.emp.age);
+				formData.append("photo",this.$refs.photo.files[0]);
+				formData.append("dept.id",this.deptId);
+				var _this = this;
+				axios({
+					method: "post",
+					url:"http://localhost:8083/back-end-springboot/emp/update",
+					data:formData,
+					//请求头
+					headers:{
+						'content-type':'multipart/form-data'
+					}
+				}).then(res=>{
+					console.log(res.data);
+					if(res.data.state){
+						if(window.confirm(res.data.message+"确定后跳转列表页面")){
+							location.href="./emplist.html?id="+this.deptId;
+						}
+					}else {
+						alert(res.data.message);
+					}
+				})
+			},
+			find(){
+				const _this = this
+				axios.get("http://localhost:8083/back-end-springboot/dept/find").then(res=>{
+					_this.depts = res.data;
+				})
+			}
+		},
+		created() {//生命周期函数
+			const userString = localStorage.getItem("user");
+			if (userString){
+				this.user = JSON.parse(userString);
+			}else {
+				alert("没登陆，跳转登陆页面");
+				location.href = "./login.html"
+			}
+			this.find();//查询所有部门
+			//获取对应的id信息
+			const start = location.href.lastIndexOf("=");
+			const id = location.href.substring(start+1);
+			console.log(id);
+			//查询一个信息
+			var  _this = this;
+			axios.get("http://localhost:8083/back-end-springboot/emp/findHead?id="+id).then(res=>{
+				console.log(res.data);
+				_this.emp = res.data;
+				_this.deptId = res.data.deptId;
+			})
+		}
+	})
+</script>

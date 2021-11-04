@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>login</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css"
+			href="css/style.css" />
+		<style>
+			body{
+				margin: 0;
+				font-size: 82.5%;
+				font-family: Verdana, Arial, Helvetica, sans-serif;
+				padding: 15px 0;
+				/*background-color: #5494F3;*/
+				background:url("./img/part.jpg") no-repeat;
+				background-size:cover;
+			}
+		</style>
+	</head>
+
+	<body id="login_body">
+		<div id="wrap">
+			<div id="top_content">
+					<div id="header">
+						<div id="rightheader">
+							<p id="cg">2021/03/01 上午12:00:00</p>
+							<script>
+								setInterval("cg.innerHTML=new Date().toLocaleString()",1000);
+							</script>
+						</div>
+						<div id="topheader">
+							<h1 id="title">
+								<a href="#">企业员工管理系统</a>
+							</h1>
+						</div>
+						<div id="navigation">
+						</div>
+					</div>
+				<div id="content">
+					<p id="whereami">
+					</p>
+					<h1>
+						login
+					</h1>
+					<form action="emplist.html" method="post">
+						<table cellpadding="0" cellspacing="0" border="0"
+							class="form_table">
+							<tr>
+								<td valign="middle" align="right">
+									用户名:
+								</td>
+								<td valign="middle" align="left">
+									<input type="text" class="inputgri" v-model="user.username"/>
+								</td>
+							</tr>
+							<tr>
+								<td valign="middle" align="right">
+									密码:
+								</td>
+								<td valign="middle" align="left">
+									<input type="password" class="inputgri" v-model="user.password"/>
+								</td>
+							</tr>
+						</table>
+						<p>
+							<input type="button" @click="login" class="button" value="确定 &raquo;" />
+							&nbsp;&nbsp;
+							<a href="./regist.html">注册</a>
+						</p>
+					</form>
+				</div>
+			</div>
+			<div id="footer">
+				<div id="footer_bg">
+					jck@126.com
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script>
+	const app = new Vue({
+		el:"#wrap",
+		data:{
+			user:{},//用来保存数据
+		},
+		methods:{
+			//用户登录的方法
+			login(){
+				//发送登录请求
+				axios.post('http://localhost:8083/back-end-springboot/user/login',this.user).then(res=>{
+					console.log(res.data);
+					if (res.data.state){
+						alert(res.data.message+"点击确定进入主页");
+						//将登录用户的信息放入localStorage，方便浏览器知道哪个用户登陆了（判断key是否存在，存在就为登录）
+						//把js中的对象转成JSON格式,反解析
+						localStorage.setItem("user",JSON.stringify(res.data.user))
+						location.href="./deptlist.html";
+					}else {
+						alert(res.data.message);
+					}
+				})
+			}
+		}
+	})
+</script>
